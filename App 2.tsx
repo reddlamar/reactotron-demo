@@ -8,6 +8,7 @@
 import React from 'react';
 import type {PropsWithChildren} from 'react';
 import {
+  Pressable,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -24,10 +25,8 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
-
-import store from './src/app/store';
-import {Provider} from 'react-redux';
-import {Counter} from './src/features/counter/counter';
+import store, {decrement, increment} from './store/index';
+import {Provider, useSelector, useDispatch} from 'react-redux';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -60,23 +59,25 @@ function Section({children, title}: SectionProps): React.JSX.Element {
 }
 
 function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
   if (__DEV__) {
     require('./ReactotronConfig');
   }
+
+  const count = useSelector((state: any) => state.counter.value);
+  const dispatch = useDispatch();
+  const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <Provider store={store}>
+    <Provider store={store}>
+      <SafeAreaView style={backgroundStyle}>
+        <StatusBar
+          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+          backgroundColor={backgroundStyle.backgroundColor}
+        />
         <ScrollView
           contentInsetAdjustmentBehavior="automatic"
           style={backgroundStyle}>
@@ -86,7 +87,17 @@ function App(): React.JSX.Element {
               backgroundColor: isDarkMode ? Colors.black : Colors.white,
             }}>
             <Section title="Step One">
-              <Counter />
+              <View>
+                <View>
+                  <Pressable onPress={() => dispatch(increment())}>
+                    <Text>Increment</Text>
+                  </Pressable>
+                  <Text>{count}</Text>
+                  <Pressable onPress={() => dispatch(decrement())}>
+                    <Text>Decrement</Text>
+                  </Pressable>
+                </View>
+              </View>
             </Section>
             <Section title="Step One">
               Edit <Text style={styles.highlight}>App.tsx</Text> to change this
@@ -104,8 +115,8 @@ function App(): React.JSX.Element {
             <LearnMoreLinks />
           </View>
         </ScrollView>
-      </Provider>
-    </SafeAreaView>
+      </SafeAreaView>
+    </Provider>
   );
 }
 
